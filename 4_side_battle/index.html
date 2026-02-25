@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<style>
+    body { 
+        background-color: transparent; 
+        margin: 0; padding: 0;
+        overflow: hidden; 
+        height: 1180px; 
+        width: 1920px;
+        font-family: 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    .main-wrapper {
+        display: flex;
+        flex-direction: column;
+        width: 1920px;
+        height: 1180px;
+    }
+
+    /* 4分割グリッド */
+    .table-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr;
+        gap: 20px;
+        padding: 20px;
+        box-sizing: border-box;
+        width: 1920px;
+        height: 1080px;
+    }
+
+    .circle-wrapper {
+        display: flex;
+        flex-direction: column;
+        background-color: rgba(0, 0, 0, 0.7);
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .circle-title {
+        color: white;
+        padding: 10px;
+        font-size: 22px;
+        font-weight: bold;
+        text-align: center;
+        border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        background: #333;
+    }
+
+    .table-container { 
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: separate; 
+        border-spacing: 0;
+        table-layout: fixed;
+    }
+
+    thead { display: table; width: 100%; }
+    tbody {
+        display: block;
+        width: 100%;
+        overflow-y: scroll;
+        scroll-behavior: auto !important;
+        scroll-snap-type: y mandatory;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+    tbody::-webkit-scrollbar { display: none; }
+
+    thead tr, tbody tr {
+        display: table;
+        width: 100%;
+        scroll-snap-align: start;
+    }
+
+    th, td { 
+        border-bottom: 1px solid rgba(255, 255, 255, 0.15); 
+        border-right: 1px solid rgba(255, 255, 255, 0.15);
+        padding: 10px 8px;
+        text-align: center;
+        box-sizing: border-box;
+        color: white;
+        vertical-align: middle;
+        white-space: normal;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        font-size: 20px;
+        line-height: 1.2;
+    }
+    th:first-child, td:first-child { border-left: 1px solid rgba(255, 255, 255, 0.15); }
+    thead tr th { border-top: 1px solid rgba(255, 255, 255, 0.15); }
+
+    /* 列幅指定 */
+    .col-no { width: 12%; position: relative; }
+    .col-crew { width: 44%; }
+
+    /* ★ヘッダーの色分けを復活 */
+    thead th:nth-child(2) { background-color: rgba(0, 80, 200, 0.9) !important; } /* 左側：青 */
+    thead th:nth-child(3) { background-color: rgba(200, 0, 60, 0.9) !important; } /* 右側：赤 */
+
+    /* ハイライト */
+    tr.selected {
+        background-color: rgba(255, 255, 255, 0.15) !important;
+    }
+    tr.selected td {
+        box-shadow: inset 0 3px 0 #00ffff, inset 0 -3px 0 #00ffff;
+    }
+    tr.selected td:first-child { box-shadow: inset 3px 3px 0 #00ffff, inset 0 -3px 0 #00ffff; }
+    tr.selected td:last-child { box-shadow: inset -3px 3px 0 #00ffff, inset 0 -3px 0 #00ffff; }
+
+    /* 終了済み（チェックマークを横に配置） */
+    tr.done { opacity: 0.3; filter: grayscale(100%); }
+    tr.done .col-no::before { 
+        content: "✔"; 
+        color: #00ff00; 
+        font-size: 18px;
+        position: absolute;
+        left: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-weight: bold;
+    }
+
+    /* 管理領域（OBS外） */
+    .controls {
+        width: 1920px;
+        height: 100px;
+        background: #1a1a1a;
+        color: #eee;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-top: 4px solid #333;
+        font-size: 18px;
+    }
+    .controls label {
+        background: #444;
+        padding: 8px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        margin: 0 10px;
+    }
+    .controls input[type="file"] { display: none; }
+</style>
+</head>
+<body>
+
+    <div class="main-wrapper">
+        <div class="table-grid">
+            <div class="circle-wrapper">
+                <div class="circle-title">Aサークル</div>
+                <div class="table-container">
+                    <table>
+                        <thead><tr><th class="col-no">No</th><th class="col-crew">CREW NAME</th><th class="col-crew">CREW NAME</th></tr></thead>
+                        <tbody id="myBodyA"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="circle-wrapper">
+                <div class="circle-title">Bサークル</div>
+                <div class="table-container">
+                    <table>
+                        <thead><tr><th class="col-no">No</th><th class="col-crew">CREW NAME</th><th class="col-crew">CREW NAME</th></tr></thead>
+                        <tbody id="myBodyB"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="circle-wrapper">
+                <div class="circle-title">Cサークル</div>
+                <div class="table-container">
+                    <table>
+                        <thead><tr><th class="col-no">No</th><th class="col-crew">CREW NAME</th><th class="col-crew">CREW NAME</th></tr></thead>
+                        <tbody id="myBodyC"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="circle-wrapper">
+                <div class="circle-title">Dサークル</div>
+                <div class="table-container">
+                    <table>
+                        <thead><tr><th class="col-no">No</th><th class="col-crew">CREW NAME</th><th class="col-crew">CREW NAME</th></tr></thead>
+                        <tbody id="myBodyD"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <strong>【管理】</strong>
+            <label>A読込<input type="file" class="csvFile" data-target="myBodyA" accept=".csv"></label>
+            <label>B読込<input type="file" class="csvFile" data-target="myBodyB" accept=".csv"></label>
+            <label>C読込<input type="file" class="csvFile" data-target="myBodyC" accept=".csv"></label>
+            <label>D読込<input type="file" class="csvFile" data-target="myBodyD" accept=".csv"></label>
+            <span style="font-size:14px; color:#888; margin-left: 20px;">[左]選択 [右]終了</span>
+        </div>
+    </div>
+
+    <script>
+        function loadCsv(file, tbodyId) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const rows = e.target.result.split(/\r\n|\n/);
+                const tbody = document.getElementById(tbodyId);
+                tbody.innerHTML = '';
+                rows.forEach(row => {
+                    if (!row.trim()) return;
+                    const cols = row.split(',');
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<td class="col-no">${cols[0]}</td><td class="col-crew">${cols[1]||''}</td><td class="col-crew">${cols[2]||''}</td>`;
+                    tbody.appendChild(tr);
+                });
+                adjustHeights();
+            };
+            reader.readAsText(file);
+        }
+
+        document.querySelectorAll('.csvFile').forEach(input => {
+            input.addEventListener('change', (e) => {
+                if(e.target.files[0]) loadCsv(e.target.files[0], e.target.dataset.target);
+            });
+        });
+
+        document.querySelectorAll('tbody').forEach(tbody => {
+            tbody.addEventListener('click', (e) => {
+                const row = e.target.closest('tr');
+                if (!row) return;
+                const isSelected = row.classList.contains('selected');
+                tbody.querySelectorAll('tr').forEach(r => r.classList.remove('selected'));
+                if (!isSelected) row.classList.add('selected');
+            });
+            tbody.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                const row = e.target.closest('tr');
+                if (row) row.classList.toggle('done');
+            });
+        });
+
+        function adjustHeights() {
+            document.querySelectorAll('.table-container').forEach(container => {
+                const header = container.querySelector('thead');
+                const body = container.querySelector('tbody');
+                if (header && body) {
+                    body.style.height = `${container.offsetHeight - header.offsetHeight}px`;
+                }
+            });
+        }
+        window.onload = adjustHeights;
+        window.onresize = adjustHeights;
+    </script>
+</body>
+</html>
